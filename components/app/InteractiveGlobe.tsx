@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 import { toast } from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { getLocalVisitedCountryCodes, addLocalVisitedCountry, removeLocalVisitedCountry } from '@/utils/localStorage';
+import { RiTwitterXLine } from 'react-icons/ri';
+import { FaInstagram } from 'react-icons/fa';
 
 // Dynamically import Globe with no SSR
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
@@ -246,16 +248,32 @@ export function InteractiveGlobe() {
                 <p className='text-xs text-gray-500 mt-3'>Click on countries to mark them as visited</p>
             </div>
 
-            <div className='absolute bottom-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg'>
-                <p className='text-xs text-gray-600'>
-                    Made by{' '}
+            <div className='absolute bottom-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 shadow-lg'>
+                <p className='text-[10px] sm:text-xs text-gray-600 flex items-center gap-1'>
+                    Made by<span className='font-semibold text-emerald-600'> Fabio Roma</span>
+                    <a
+                        href='https://x.com/fabioroma_'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-gray-600 hover:text-blue-600 transition-colors'
+                        aria-label='X (Twitter)'
+                    >
+                        <RiTwitterXLine
+                            size={14}
+                            className='w-3 h-3 sm:w-3.5 sm:h-3.5'
+                        />
+                    </a>
                     <a
                         href='https://instagram.com/ofabioroma'
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='font-semibold text-blue-600 hover:text-blue-700 transition-colors'
+                        className='text-gray-600 hover:text-pink-600 transition-colors'
+                        aria-label='Instagram'
                     >
-                        @ofabioroma
+                        <FaInstagram
+                            size={14}
+                            className='w-3 h-3 sm:w-3.5 sm:h-3.5'
+                        />
                     </a>
                 </p>
             </div>
