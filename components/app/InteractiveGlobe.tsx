@@ -159,6 +159,19 @@ export function InteractiveGlobe() {
 		return visitedCountries.has(countryCode) ? 0.02 : 0.01;
 	};
 
+	// Convert ISO alpha-2 country code to flag emoji
+	const getCountryFlag = (countryCode: string) => {
+		if (!countryCode || countryCode.length !== 2) return '';
+
+		// Convert country code to regional indicator symbols
+		const codePoints = countryCode
+			.toUpperCase()
+			.split('')
+			.map(char => 127397 + char.charCodeAt(0));
+
+		return String.fromCodePoint(...codePoints);
+	};
+
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -196,11 +209,17 @@ export function InteractiveGlobe() {
 				polygonStrokeColor={getPolygonStrokeColor}
 				polygonAltitude={getPolygonAltitude}
 				onPolygonClick={handlePolygonClick}
-				polygonLabel={({ properties }: Country) => `
-					<div style="background: rgba(0,0,0,0.8); padding: 8px; border-radius: 4px; color: white;">
-						<strong>${properties.NAME}</strong>
-					</div>
-				`}
+				polygonLabel={({ properties }: Country) => {
+					const flag = getCountryFlag(properties.ISO_A2);
+					return `
+						<div style="background: rgba(0,0,0,0.8); padding: 8px 12px; border-radius: 6px; color: white; font-size: 14px;">
+							<div style="display: flex; align-items: center; gap: 8px;">
+								<span style="font-size: 24px;">${flag}</span>
+								<strong>${properties.NAME}</strong>
+							</div>
+						</div>
+					`;
+				}}
 				animateIn={true}
 			/>
 		</div>
