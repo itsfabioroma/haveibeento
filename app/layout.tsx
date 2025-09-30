@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import config from "@/config";
 import "./globals.css";
-import { GoogleTagManager } from '@next/third-parties/google'
-import { OpenPanelComponent } from '@openpanel/nextjs';
+import Script from 'next/script'
 import { SessionProvider } from "next-auth/react"
 import { Toaster } from 'react-hot-toast';
-import FooterWrapper from "@/components/ui/FooterWrapper";
+import { Header } from "@/components/app/Header";
 
 export const metadata: Metadata = config.metadata;
 
@@ -21,28 +20,43 @@ export default function RootLayout({
           className="antialiased min-h-screen flex flex-col"
         >
           <Toaster position="top-center" />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <FooterWrapper />
+          <div className="flex flex-col h-screen bg-[var(--background)]">
+            <Header />
+            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[var(--background)]">
+              {children}
+            </main>
+          </div>
         </body>
+        {/* Google Tag Manager - Optimized for Core Web Vitals */}
+        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
+          <Script
+            id="gtm"
+            strategy="lazyOnload"
+            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
+          />
+        )}
+        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
+          <Script id="gtm-init" strategy="lazyOnload">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
+            `}
+          </Script>
+        )}
+
+        {/* OpenPanel Analytics - Optimized for Core Web Vitals */}
+        {process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID && (
+          <Script
+            id="openpanel"
+            strategy="lazyOnload"
+            src="https://openpanel.dev/op.js"
+            data-client-id={process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID}
+            data-track-screen-views="true"
+          />
+        )}
       </SessionProvider>
-      {/* Google Tag Manager */}
-      {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID} />
-      )}
-      
-      {/* OpenPanel Analytics */}
-      {process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID && (
-        <OpenPanelComponent
-          clientId={process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID}
-          trackScreenViews={true}
-          // trackAttributes={true}
-          // trackOutgoingLinks={true}
-          // If you have a user id, you can pass it here to identify the user
-          // profileId={'123'}
-        />
-      )}
     </html>
   );
 }

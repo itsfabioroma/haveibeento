@@ -4,7 +4,7 @@ export { GET, POST };
 
 import EmailProvider from 'next-auth/providers/nodemailer';
 
-export const authOptions = {
+const authOptions = {
     providers: [
         EmailProvider({
             server: {

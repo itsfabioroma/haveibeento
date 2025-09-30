@@ -5,6 +5,14 @@ import PortalButton from '@/components/stripe/PortalButton';
 import CheckoutButton from "@/components/CheckoutButton";
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface VisitedCountry {
+	id: string;
+	country_code: string;
+	country_name: string;
+	visited_date: string;
+	notes?: string;
+}
+
 // Helper function to get plan badge style
 function getPlanBadgeStyle(planName: string): { bgColor: string; textColor: string; borderColor: string } {
 	switch (planName.toLowerCase()) {
@@ -87,25 +95,36 @@ export default function ProfileAndBillingContent() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [profileData, setProfileData] = useState<any>(null);
+	const [visitedCountries, setVisitedCountries] = useState<VisitedCountry[]>([]);
 
 	useEffect(() => {
-		async function fetchProfileData() {
+		async function fetchData() {
 			try {
-				const response = await fetch('/api/profile');
-				if (!response.ok) {
+				const [profileResponse, countriesResponse] = await Promise.all([
+					fetch('/api/profile'),
+					fetch('/api/countries')
+				]);
+
+				if (!profileResponse.ok) {
 					throw new Error('Failed to fetch profile data');
 				}
-				const data = await response.json();
-				setProfileData(data);
+
+				const profileData = await profileResponse.json();
+				setProfileData(profileData);
+
+				if (countriesResponse.ok) {
+					const countriesData = await countriesResponse.json();
+					setVisitedCountries(countriesData.countries || []);
+				}
 			} catch (err) {
-				console.error('Error fetching profile data:', err);
+				console.error('Error fetching data:', err);
 				setError('Failed to load profile data. Please try again later.');
 			} finally {
 				setLoading(false);
 			}
 		}
 
-		fetchProfileData();
+		fetchData();
 	}, []);
 
 	if (loading) {
@@ -194,8 +213,64 @@ export default function ProfileAndBillingContent() {
 				</div>
 			</motion.div>
 
-			{/* Subscription Information */}
-			<motion.div 
+			{/* Visited Countries Section */}
+			<motion.div
+				className="bg-[var(--background)] shadow-lg rounded-xl p-8 border border-[var(--border)] hover:shadow-xl transition-shadow duration-300"
+				variants={fadeIn}
+			>
+				<div className="flex items-center justify-between mb-6">
+					<div className="flex items-center">
+						<div className="bg-gradient-to-r from-[#5059FE] to-[#7D65F6] p-2 rounded-lg mr-4">
+							<svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+						</div>
+						<h2 className="text-xl font-bold">Countries Visited</h2>
+					</div>
+					<span className="bg-[#5059FE] text-white px-4 py-2 rounded-full text-sm font-bold">
+						{visitedCountries.length} {visitedCountries.length === 1 ? 'Country' : 'Countries'}
+					</span>
+				</div>
+
+				{visitedCountries.length === 0 ? (
+					<div className="text-center py-12 bg-[var(--background-subtle)] rounded-xl">
+						<svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						<p className="text-gray-600">You haven't marked any countries as visited yet.</p>
+						<p className="text-sm text-gray-500 mt-2">Go to the globe and start tracking your travels!</p>
+					</div>
+				) : (
+					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+						{visitedCountries.map((country) => (
+							<motion.div
+								key={country.id}
+								className="bg-[var(--background-subtle)] p-4 rounded-lg border border-[var(--border)] hover:border-[#5059FE] transition-all duration-200 hover:shadow-md"
+								whileHover={{ y: -2 }}
+							>
+								<div className="flex items-start justify-between mb-2">
+									<span className="text-2xl" title={country.country_name}>
+										{country.country_code}
+									</span>
+									<span className="text-xs text-gray-500">
+										{new Date(country.visited_date).toLocaleDateString('en-US', {
+											month: 'short',
+											year: 'numeric'
+										})}
+									</span>
+								</div>
+								<p className="font-semibold text-sm">{country.country_name}</p>
+								{country.notes && (
+									<p className="text-xs text-gray-600 mt-2 line-clamp-2">{country.notes}</p>
+								)}
+							</motion.div>
+						))}
+					</div>
+				)}
+			</motion.div>
+
+			{/* Subscription Information - Commented out for now */}
+			{/* <motion.div
 				className="bg-[var(--background)] shadow-lg rounded-xl p-8 border border-[var(--border)] hover:shadow-xl transition-shadow duration-300"
 				variants={fadeIn}
 			>
@@ -313,7 +388,7 @@ export default function ProfileAndBillingContent() {
 						)}
 					</div>
 				</div>
-			</motion.div>
+			</motion.div> */}
 
 			{/* Pricing Section */}
 			<AnimatePresence>

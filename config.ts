@@ -1,8 +1,53 @@
 const config = {
 	metadata: {
-		title: "Saas Starter",
-		description: "Saas Starter Kit for demo purpose ",
-		keywords: ["Saas", "Starter Kit", "Demo", "Note Taking", "AI", "Chatbot"],
+		metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+		title: "Have I Been To",
+		description: "Track and visualize the countries you've visited with an interactive 3D globe",
+		keywords: ["Travel", "Globe", "Countries", "Visited", "Map", "Interactive", "3D Visualization", "Travel Tracker"],
+		authors: [{ name: "Have I Been To" }],
+		creator: "Have I Been To",
+		publisher: "Have I Been To",
+		formatDetection: {
+			email: false,
+			address: false,
+			telephone: false,
+		},
+		openGraph: {
+			type: 'website',
+			locale: 'en_US',
+			url: '/',
+			siteName: 'Have I Been To',
+			title: 'Have I Been To - Interactive Travel Tracking',
+			description: 'Track and visualize the countries you\'ve visited with an interactive 3D globe',
+			images: [
+				{
+					url: '/opengraph-image',
+					width: 1200,
+					height: 630,
+					alt: 'Have I Been To - Interactive Globe Preview',
+				},
+			],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title: 'Have I Been To',
+			description: 'Track and visualize the countries you\'ve visited with an interactive 3D globe',
+			images: ['/opengraph-image'],
+		},
+		robots: {
+			index: true,
+			follow: true,
+			googleBot: {
+				index: true,
+				follow: true,
+				'max-video-preview': -1,
+				'max-image-preview': 'large' as const,
+				'max-snippet': -1,
+			},
+		},
+		alternates: {
+			canonical: '/',
+		},
 	},
 	theme: {
 		colors: {
@@ -12,7 +57,7 @@ const config = {
 			borderHover: '#D1D5DB'  // Border hover color
 		}
 	},
-	// Add stripe plan
+	// Stripe configuration (unused - kept for potential future use)
 	stripe: {
 		free: {
 			monthPrice: 0,
@@ -42,7 +87,7 @@ const config = {
 			description: 'Pro plan',
 		},
 	},
-	appName: "saas starter kit",
+	appName: "Have I Been To",
 	socialLinks: {
 		github: "https://github.com",
 		twitter: "https://twitter.com",
