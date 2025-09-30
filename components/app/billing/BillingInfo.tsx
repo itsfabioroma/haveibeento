@@ -103,7 +103,7 @@ export async function BillingInfo() {
 
 	let planName = 'Free';
 	let planInterval = 'month';
-	if (subscriptionData?.subscription_id) {
+	if (subscriptionData?.subscription_id && stripe) {
 		const subscription = await stripe.subscriptions.retrieve(subscriptionData.subscription_id);
 		const priceId = subscription.items.data[0].price.id;
 		const planInfo = getPlanNameFromPriceId(priceId);

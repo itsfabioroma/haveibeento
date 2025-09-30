@@ -39,8 +39,12 @@ export async function POST(request: Request) {
 }
 
 async function getPaymentIntentId(subscriptionId: string) {
+	if (!stripe) {
+		throw new Error('Stripe is not configured');
+	}
+
 	try {
-		// Get subscription information  english comment please
+		// Get subscription information
 		const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
 		// Get the latest invoice
