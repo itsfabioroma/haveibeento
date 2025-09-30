@@ -250,12 +250,12 @@ export function InteractiveGlobe() {
                 <p className='text-xs text-gray-600'>
                     Made by{' '}
                     <a
-                        href='https://fabioroma.dev'
+                        href='https://instagram.com/ofabioroma'
                         target='_blank'
                         rel='noopener noreferrer'
                         className='font-semibold text-blue-600 hover:text-blue-700 transition-colors'
                     >
-                        Fabio Roma
+                        @ofabioroma
                     </a>
                 </p>
             </div>
