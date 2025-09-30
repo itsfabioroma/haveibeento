@@ -146,7 +146,7 @@ export function InteractiveGlobe() {
                         setTimeout(() => setSelectedCountry(null), 300);
 
                         // Show toast with sign-in prompt
-                        toast.success(`${countryName} added! Sign in to keep your travels safe (it's free!)`, {
+                        toast.success(`${countryName} added! Sign Up (for free) to save your countries forever.`, {
                             duration: 5000,
                             icon: '🌍',
                         });
