@@ -31,7 +31,9 @@ export default function UserMenu() {
         };
     }, [isMenuOpen]);
 
-    if (!user) return null;
+    if (!user) {
+        return null;
+    }
 
     return (
         <div

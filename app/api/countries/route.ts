@@ -25,6 +25,38 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
 	try {
 		const body = await request.json();
+
+		// Check if bulk sync request
+		if (body.countries && Array.isArray(body.countries)) {
+			// Bulk insert for syncing localStorage data
+			const supabase = await getSupabaseClient();
+			const insertData = body.countries.map((c: any) => ({
+				country_code: c.country_code,
+				country_name: c.country_name,
+				notes: c.notes || null,
+			}));
+
+			// Use upsert to handle duplicates gracefully
+			const { data, error } = await supabase
+				.from('visited_countries')
+				.upsert(insertData, {
+					onConflict: 'user_id,country_code',
+					ignoreDuplicates: true,
+				})
+				.select();
+
+			if (error) {
+				console.error('Error bulk inserting countries:', error);
+				return NextResponse.json({ error: error.message }, { status: 500 });
+			}
+
+			return NextResponse.json({
+				success: true,
+				synced: data?.length || 0,
+			}, { status: 201 });
+		}
+
+		// Single country insert (original behavior)
 		const { country_code, country_name, notes } = body;
 
 		if (!country_code || !country_name) {

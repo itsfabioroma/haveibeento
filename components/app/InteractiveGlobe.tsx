@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { toast } from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
+import { getLocalVisitedCountryCodes, addLocalVisitedCountry, removeLocalVisitedCountry } from '@/utils/localStorage';
 
 // Dynamically import Globe with no SSR
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
@@ -26,6 +28,9 @@ interface Country {
 }
 
 export function InteractiveGlobe() {
+    const { data: session } = useSession();
+    const isAuthenticated = !!session?.user;
+
     const [countries, setCountries] = useState<any>({ features: [] });
     const [visitedCountries, setVisitedCountries] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(true);
@@ -47,16 +52,24 @@ export function InteractiveGlobe() {
         if (countries.features.length > 0) {
             loadVisitedCountries();
         }
-    }, [countries]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [countries, isAuthenticated]);
 
     const loadVisitedCountries = async () => {
         try {
-            const response = await fetch('/api/countries');
-            const data = await response.json();
+            if (isAuthenticated) {
+                // Load from server for authenticated users
+                const response = await fetch('/api/countries');
+                const data = await response.json();
 
-            if (data.countries) {
-                const codes = new Set<string>(data.countries.map((c: VisitedCountry) => c.country_code));
-                setVisitedCountries(codes);
+                if (data.countries) {
+                    const codes = new Set<string>(data.countries.map((c: VisitedCountry) => c.country_code));
+                    setVisitedCountries(codes);
+                }
+            } else {
+                // Load from localStorage for unauthenticated users
+                const localCodes = getLocalVisitedCountryCodes();
+                setVisitedCountries(localCodes);
             }
         } catch (error) {
             console.error('Error loading visited countries:', error);
@@ -69,48 +82,80 @@ export function InteractiveGlobe() {
     const toggleCountry = async (countryCode: string, countryName: string) => {
         const isVisited = visitedCountries.has(countryCode);
 
-        try {
-            if (isVisited) {
-                // Remove country
-                const response = await fetch(`/api/countries?country_code=${countryCode}`, {
-                    method: 'DELETE',
-                });
-
-                if (response.ok) {
-                    setVisitedCountries((prev) => {
-                        const newSet = new Set(prev);
-                        newSet.delete(countryCode);
-                        return newSet;
+        if (isAuthenticated) {
+            // Authenticated: use server API
+            try {
+                if (isVisited) {
+                    // Remove country
+                    const response = await fetch(`/api/countries?country_code=${countryCode}`, {
+                        method: 'DELETE',
                     });
-                    // Fade out animation
-                    setTimeout(() => setSelectedCountry(null), 300);
-                    toast.success(`${countryName} removed`);
-                } else {
-                    throw new Error('Failed to remove country');
-                }
-            } else {
-                // Add country
-                const response = await fetch('/api/countries', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        country_code: countryCode,
-                        country_name: countryName,
-                    }),
-                });
 
-                if (response.ok) {
-                    setVisitedCountries((prev) => new Set([...prev, countryCode]));
-                    // Fade out animation
-                    setTimeout(() => setSelectedCountry(null), 300);
-                    toast.success(`${countryName} marked as visited!`);
+                    if (response.ok) {
+                        setVisitedCountries((prev) => {
+                            const newSet = new Set(prev);
+                            newSet.delete(countryCode);
+                            return newSet;
+                        });
+                        setTimeout(() => setSelectedCountry(null), 300);
+                        toast.success(`${countryName} removed`);
+                    } else {
+                        throw new Error('Failed to remove country');
+                    }
                 } else {
-                    throw new Error('Failed to add country');
+                    // Add country
+                    const response = await fetch('/api/countries', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            country_code: countryCode,
+                            country_name: countryName,
+                        }),
+                    });
+
+                    if (response.ok) {
+                        setVisitedCountries((prev) => new Set([...prev, countryCode]));
+                        setTimeout(() => setSelectedCountry(null), 300);
+                        toast.success(`${countryName} marked as visited!`);
+                    } else {
+                        throw new Error('Failed to add country');
+                    }
                 }
+            } catch (error) {
+                console.error('Error toggling country:', error);
+                toast.error('Failed to update country');
             }
-        } catch (error) {
-            console.error('Error toggling country:', error);
-            toast.error('Failed to update country');
+        } else {
+            // Not authenticated: use localStorage and prompt to sign in
+            try {
+                if (isVisited) {
+                    // Remove from localStorage
+                    if (removeLocalVisitedCountry(countryCode)) {
+                        setVisitedCountries((prev) => {
+                            const newSet = new Set(prev);
+                            newSet.delete(countryCode);
+                            return newSet;
+                        });
+                        setTimeout(() => setSelectedCountry(null), 300);
+                        toast.success(`${countryName} removed`);
+                    }
+                } else {
+                    // Add to localStorage
+                    if (addLocalVisitedCountry(countryCode, countryName)) {
+                        setVisitedCountries((prev) => new Set([...prev, countryCode]));
+                        setTimeout(() => setSelectedCountry(null), 300);
+
+                        // Show toast with sign-in prompt
+                        toast.success(`${countryName} added! Sign in to keep your travels safe (it's free!)`, {
+                            duration: 5000,
+                            icon: '🌍',
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error toggling country:', error);
+                toast.error('Failed to update country');
+            }
         }
     };
 
@@ -199,6 +244,20 @@ export function InteractiveGlobe() {
                     </div>
                 </div>
                 <p className='text-xs text-gray-500 mt-3'>Click on countries to mark them as visited</p>
+            </div>
+
+            <div className='absolute bottom-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg'>
+                <p className='text-xs text-gray-600'>
+                    Made by{' '}
+                    <a
+                        href='https://fabioroma.dev'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='font-semibold text-blue-600 hover:text-blue-700 transition-colors'
+                    >
+                        Fabio Roma
+                    </a>
+                </p>
             </div>
 
             <Globe

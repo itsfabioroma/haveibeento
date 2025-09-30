@@ -1,15 +1,14 @@
 import authConfig from "@/lib/auth.config"
 import NextAuth from "next-auth"
-import { NextResponse } from "next/server"
 
 export const config = {
-	matcher: ["/"],
+	matcher: ["/app/:path*"],
 };
 
 const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
-	if (!req.auth) {
-		return NextResponse.redirect(new URL("/api/auth/signin", req.url));
-	}
+	// Allow unauthenticated access to root route
+	// Only protect /app/* routes if we add them in the future
+	return;
 });

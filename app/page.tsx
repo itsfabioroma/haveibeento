@@ -1,10 +1,15 @@
+'use client';
+
 import { InteractiveGlobe } from "@/components/app/InteractiveGlobe";
+import { useAuthSync } from "@/hooks/useAuthSync";
 
 /**
  * Have I Been To - Interactive Globe
  * Main page showing a 3D globe where users can mark visited countries
  */
 export default function HomePage() {
+  // Automatically sync localStorage to server when user signs in
+  useAuthSync();
   // JSON-LD structured data for SEO
   const jsonLd = {
     '@context': 'https://schema.org',
