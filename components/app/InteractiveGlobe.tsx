@@ -248,8 +248,8 @@ export function InteractiveGlobe() {
                 <p className='text-xs text-gray-500 mt-3'>Click on countries to mark them as visited</p>
             </div>
 
-            <div className='absolute bottom-4 right-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1.5 sm:px-3 sm:py-2 shadow-lg'>
-                <p className='text-[10px] sm:text-xs text-gray-600 flex items-center gap-1'>
+            <div className='absolute bottom-2 right-2 sm:bottom-4 sm:right-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg max-w-[calc(100vw-1rem)] sm:max-w-none'>
+                <p className='text-xs text-gray-600 flex items-center gap-1 whitespace-nowrap'>
                     Made by<span className='font-semibold text-emerald-600'> Fabio Roma</span>
                     <a
                         href='https://x.com/fabioroma_'
@@ -258,10 +258,7 @@ export function InteractiveGlobe() {
                         className='text-gray-600 hover:text-blue-600 transition-colors'
                         aria-label='X (Twitter)'
                     >
-                        <RiTwitterXLine
-                            size={14}
-                            className='w-3 h-3 sm:w-3.5 sm:h-3.5'
-                        />
+                        <RiTwitterXLine className='w-3.5 h-3.5' />
                     </a>
                     <a
                         href='https://instagram.com/ofabioroma'
@@ -270,10 +267,7 @@ export function InteractiveGlobe() {
                         className='text-gray-600 hover:text-pink-600 transition-colors'
                         aria-label='Instagram'
                     >
-                        <FaInstagram
-                            size={14}
-                            className='w-3 h-3 sm:w-3.5 sm:h-3.5'
-                        />
+                        <FaInstagram className='w-3.5 h-3.5' />
                     </a>
                 </p>
             </div>
