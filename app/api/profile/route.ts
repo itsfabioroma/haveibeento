@@ -51,7 +51,7 @@ export async function GET() {
 		let planInterval = 'month';
 		let subscription = null;
 
-		if (subscriptionData?.subscription_id) {
+		if (subscriptionData?.subscription_id && stripe) {
 			subscription = await stripe.subscriptions.retrieve(subscriptionData.subscription_id);
 			const priceId = subscription.items.data[0].price.id;
 			const planInfo = getPlanNameFromPriceId(priceId);

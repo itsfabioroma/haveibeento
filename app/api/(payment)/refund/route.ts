@@ -5,6 +5,14 @@ import { auth } from '@/lib/auth';
 
 export async function POST(request: Request) {
 	try {
+		// Check if Stripe is configured
+		if (!stripe) {
+			return NextResponse.json(
+				{ message: 'Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.' },
+				{ status: 503 }
+			);
+		}
+
 		const userSession = await auth()
 		const userId = userSession?.user?.id
 		if (!userId) {

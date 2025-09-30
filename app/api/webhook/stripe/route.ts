@@ -10,6 +10,14 @@ const supabaseAdmin = await createSupabaseAdminClient();
 
 export async function POST(request: NextRequest) {
 	try {
+		// Check if Stripe is configured
+		if (!stripe) {
+			return NextResponse.json(
+				{ message: 'Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.' },
+				{ status: 503 }
+			);
+		}
+
 		const rawBody = await request.text();
 		const signature = request.headers.get('stripe-signature');
 		// verify Stripe event is legit

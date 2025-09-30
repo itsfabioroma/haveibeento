@@ -9,6 +9,10 @@ export async function createPortalSession(customerId: string) {
 		throw new Error('Customer ID is required');
 	}
 
+	if (!stripe) {
+		throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+	}
+
 	try {
 		// get the current domain
 		const headersList = await headers();
@@ -28,6 +32,10 @@ export async function createPortalSession(customerId: string) {
 
 
 export async function refund(subscriptionId: string) {
+	if (!stripe) {
+		throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
+	}
+
 	try {
 		const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 		const latestInvoice = await stripe.invoices.retrieve(subscription.latest_invoice as string);
